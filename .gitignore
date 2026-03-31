@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Embedded Python
+backend/embedded_python/
+backend/get-pip.py
+backend/python.zip
+Lib/
+Scripts/
+pyvenv.cfg
