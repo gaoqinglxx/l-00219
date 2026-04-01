@@ -167,9 +167,20 @@ class GameState:
         self.sky_sun_timer += 1
         if self.sky_sun_timer >= self.sky_sun_interval:
             self.sky_sun_timer = 0
-            x = random.randint(GRID_OFFSET_X, GRID_OFFSET_X + COLS * GRID_SIZE)
-            y = random.randint(GRID_OFFSET_Y + 40, GRID_OFFSET_Y + ROWS * GRID_SIZE - 40)
-            self.suns.append(Sun(x, y, from_sky=True))
+            # 找到所有空白单元格
+            empty_cells = []
+            for row in range(ROWS):
+                for col in range(COLS):
+                    if self.grid[row][col] is None:
+                        empty_cells.append((row, col))
+            
+            if empty_cells:
+                # 随机选择一个空白单元格
+                row, col = random.choice(empty_cells)
+                # 计算单元格中心位置
+                x = GRID_OFFSET_X + col * GRID_SIZE + GRID_SIZE // 2
+                y = GRID_OFFSET_Y + row * GRID_SIZE + GRID_SIZE // 2
+                self.suns.append(Sun(x, y, from_sky=True))
         
         # 更新阳光
         for sun in self.suns[:]:
@@ -179,6 +190,15 @@ class GameState:
                 logger.log_sun_collected(collected, self.sun_count)
             if not sun.alive:
                 self.suns.remove(sun)
+            # 检查阳光是否已经落完并检查所在单元格
+            elif not sun.collected and (not sun.from_sky or sun.y >= sun.target_y):
+                # 计算阳光所在的网格单元格
+                col = int((sun.x - GRID_OFFSET_X) // GRID_SIZE)
+                row = int((sun.y - GRID_OFFSET_Y) // GRID_SIZE)
+                # 如果单元格有植物，自动收集阳光
+                if 0 <= row < ROWS and 0 <= col < COLS:
+                    if self.grid[row][col] is not None:
+                        sun.collected = True
         
         # 生成僵尸
         self.zombie_spawn_timer += 1

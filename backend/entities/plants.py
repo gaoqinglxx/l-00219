@@ -73,6 +73,7 @@ class Sunflower(Plant):
         self.sun_timer += 1
         if self.sun_timer >= self.sun_interval:
             self.sun_timer = 0
+            # 向日葵产生的阳光落在当前单元格中心附近小范围内
             suns.append(Sun(self.x + random.randint(-15, 15), 
                            self.y + random.randint(-5, 25), from_sky=False))
     
