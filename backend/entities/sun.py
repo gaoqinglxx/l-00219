@@ -14,7 +14,7 @@ def get_color(name):
 
 class Sun:
     """阳光类"""
-    def __init__(self, x, y, from_sky=True):
+    def __init__(self, x, y, from_sky=True, row=None, col=None):
         self.x = x
         self.y = y if not from_sky else GRID_OFFSET_Y - 50
         self.target_y = y
@@ -26,6 +26,9 @@ class Sun:
         self.speed = SUN_CONFIG["sun_fall_speed"]
         self.collected = False
         self.collect_target = (70, 25)
+        self.row = row
+        self.col = col
+        self.reached_target = False
         
     def update(self):
         """更新阳光状态，返回收集的阳光值"""
@@ -40,7 +43,11 @@ class Sun:
             self.y += dy * 0.15
         elif self.from_sky and self.y < self.target_y:
             self.y += self.speed
+            if self.y >= self.target_y:
+                self.reached_target = True
         else:
+            if not self.reached_target and not self.from_sky:
+                self.reached_target = True
             self.lifetime -= 1
             if self.lifetime <= 0:
                 self.alive = False

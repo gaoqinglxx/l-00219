@@ -167,9 +167,17 @@ class GameState:
         self.sky_sun_timer += 1
         if self.sky_sun_timer >= self.sky_sun_interval:
             self.sky_sun_timer = 0
-            x = random.randint(GRID_OFFSET_X, GRID_OFFSET_X + COLS * GRID_SIZE)
-            y = random.randint(GRID_OFFSET_Y + 40, GRID_OFFSET_Y + ROWS * GRID_SIZE - 40)
-            self.suns.append(Sun(x, y, from_sky=True))
+            empty_cells = []
+            for row in range(ROWS):
+                for col in range(COLS):
+                    if self.grid[row][col] is None:
+                        empty_cells.append((row, col))
+            
+            if empty_cells:
+                row, col = random.choice(empty_cells)
+                x = GRID_OFFSET_X + col * GRID_SIZE + GRID_SIZE // 2
+                y = GRID_OFFSET_Y + row * GRID_SIZE + GRID_SIZE // 2
+                self.suns.append(Sun(x, y, from_sky=True, row=row, col=col))
         
         # 更新阳光
         for sun in self.suns[:]:
@@ -177,6 +185,12 @@ class GameState:
             if collected:
                 self.sun_count += collected
                 logger.log_sun_collected(collected, self.sun_count)
+            
+            if sun.reached_target and not sun.collected and sun.row is not None and sun.col is not None:
+                if 0 <= sun.row < ROWS and 0 <= sun.col < COLS:
+                    if self.grid[sun.row][sun.col] is not None:
+                        sun.collected = True
+            
             if not sun.alive:
                 self.suns.remove(sun)
         
