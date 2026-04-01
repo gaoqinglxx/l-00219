@@ -73,8 +73,7 @@ class Sunflower(Plant):
         self.sun_timer += 1
         if self.sun_timer >= self.sun_interval:
             self.sun_timer = 0
-            suns.append(Sun(self.x + random.randint(-15, 15), 
-                           self.y + random.randint(-5, 25), from_sky=False))
+            suns.append(Sun(self.x, self.y + 10, from_sky=False, row=self.row, col=self.col))
     
     def draw(self, surface):
         bob = math.sin(self.animation_frame * 0.1) * 2
