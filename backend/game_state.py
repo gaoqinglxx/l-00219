@@ -167,9 +167,21 @@ class GameState:
         self.sky_sun_timer += 1
         if self.sky_sun_timer >= self.sky_sun_interval:
             self.sky_sun_timer = 0
-            x = random.randint(GRID_OFFSET_X, GRID_OFFSET_X + COLS * GRID_SIZE)
-            y = random.randint(GRID_OFFSET_Y + 40, GRID_OFFSET_Y + ROWS * GRID_SIZE - 40)
-            self.suns.append(Sun(x, y, from_sky=True))
+            # 找出所有空白单元格
+            empty_cells = []
+            for row in range(ROWS):
+                for col in range(COLS):
+                    if self.grid[row][col] is None:
+                        empty_cells.append((row, col))
+            
+            if empty_cells:
+                # 随机选择一个空白单元格
+                row, col = random.choice(empty_cells)
+                # 计算单元格中心位置
+                x = GRID_OFFSET_X + col * GRID_SIZE + GRID_SIZE // 2
+                y = GRID_OFFSET_Y + row * GRID_SIZE + GRID_SIZE // 2
+                sun = Sun(x, y, from_sky=True)
+                self.suns.append(sun)
         
         # 更新阳光
         for sun in self.suns[:]:
@@ -177,6 +189,15 @@ class GameState:
             if collected:
                 self.sun_count += collected
                 logger.log_sun_collected(collected, self.sun_count)
+            # 阳光完成落下后，检查所在单元格是否有物体，有则自动收集
+            if not sun.collected and sun.y >= sun.target_y:
+                # 计算阳光所在的单元格
+                col = int((sun.x - GRID_OFFSET_X) // GRID_SIZE)
+                row = int((sun.y - GRID_OFFSET_Y) // GRID_SIZE)
+                # 检查单元格是否有效且有植物
+                if 0 <= row < ROWS and 0 <= col < COLS:
+                    if self.grid[row][col] is not None:
+                        sun.collected = True
             if not sun.alive:
                 self.suns.remove(sun)
         
