@@ -189,11 +189,15 @@ class GameState:
             if collected:
                 self.sun_count += collected
                 logger.log_sun_collected(collected, self.sun_count)
-            # 阳光完成落下后自动收集
-            if not sun.collected and not sun.from_sky:
-                sun.collected = True
-            elif not sun.collected and sun.from_sky and sun.y >= sun.target_y:
-                sun.collected = True
+            # 阳光完成落下后，检查所在单元格是否有物体，有则自动收集
+            if not sun.collected and sun.y >= sun.target_y:
+                # 计算阳光所在的单元格
+                col = int((sun.x - GRID_OFFSET_X) // GRID_SIZE)
+                row = int((sun.y - GRID_OFFSET_Y) // GRID_SIZE)
+                # 检查单元格是否有效且有植物
+                if 0 <= row < ROWS and 0 <= col < COLS:
+                    if self.grid[row][col] is not None:
+                        sun.collected = True
             if not sun.alive:
                 self.suns.remove(sun)
         
